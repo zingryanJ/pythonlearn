@@ -1,13 +1,13 @@
 from bs4 import BeautifulSoup
 import requests
 import time
+import pymongo
 
 def getsex(class_name):
 	if class_name == ['member_ico']:
 		return '男'
 	else:
 		return '女'
-
 
 def getlink(url):
 	wb_data=requests.get(url)
@@ -38,8 +38,16 @@ def getinfo(url):
 			'mname':mname.get_text(),
 			'sex':getsex(sex.get('class'))
 		}
-		print(data)
+		houses_tab.insert_one(data)
 
-urls=['http://bj.xiaozhu.com/search-duanzufang-p{}-0/'.format(number) for number in range(1,2)]
-for surl in urls:	
-	getlink(surl)
+
+client = pymongo.MongoClient('localhost',27017)
+xiaozhu = client['xiaozhu']
+houses_tab = xiaozhu['houses_tab']
+
+# urls=['http://bj.xiaozhu.com/search-duanzufang-p{}-0/'.format(number) for number in range(1,3)]
+# for surl in urls:
+# 	getlink(surl)
+
+for item in houses_tab.find({'price':{'$gte':'500'}}):
+    print(item)
